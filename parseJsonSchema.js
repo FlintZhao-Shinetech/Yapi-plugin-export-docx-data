@@ -12,25 +12,43 @@ function jsonSchemaParser(data){
     return result;
 }
 function realParser(api){
-    if(!api.res_body_is_json_schema){
-        return api;
-    }
     // 移除const效果，否则在toDocx之前的JSON.stringify会丢失新增的属性
     // 即使这里看上去像是加上了
     let newApi=JSON.parse(JSON.stringify(api));
-    let res_body_schema=null;
-    try{
-        res_body_schema=JSON.parse(newApi.res_body);
-    }catch(e){
-        console.log(newApi.res_body);
+    // 返回结果处理开始
+    if(newApi.res_body_is_json_schema){
+        let res_body_schema=null;
+        try{
+            res_body_schema=JSON.parse(newApi.res_body);
+        }catch(e){
+            console.log("parse res_body error:",newApi.res_body);
+        }
+        let schema_array=[];
+        if(res_body_schema){
+            parse_schema("",res_body_schema,false,schema_array,0);
+        }else{
+            newApi.res_body_is_json_schema=false;
+        }
+        newApi.res_body_json_schema_form=schema_array;
     }
-    let schema_array=[];
-    if(res_body_schema){
-        parse_schema("",res_body_schema,false,schema_array,0);
-    }else{
-        newApi.res_body_is_json_schema=false;
+    // 返回结果处理结束
+    // 请求参数处理开始
+    if(newApi.req_body_is_json_schema && newApi.req_body_other){
+        let req_body_schema=null;
+        try{
+            req_body_schema=JSON.parse(newApi.req_body_other);
+        }catch(e){
+            console.log("parse req_body_other error:",newApi.req_body_other);
+        }
+        let schema_array=[];
+        if(req_body_schema){
+            parse_schema("",req_body_schema,false,schema_array,0);
+        }else{
+            newApi.req_body_is_json_schema=false;
+        }
+        newApi.req_body_json_schema_form=schema_array;
     }
-    newApi.res_body_json_schema_form=schema_array;
+    // 请求参数处理结束
     return newApi;
 }
 

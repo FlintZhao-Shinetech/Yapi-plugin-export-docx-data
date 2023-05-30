@@ -59,7 +59,9 @@
                                 "__v": 0,
                                 "desc": "",
                                 "markdown": "",
-                                "res_body": ""
+                                "res_body": "",
+                                "res_body_json_schema_form": [],
+                                "req_body_json_schema_form": []
                         }
                         ]
                 }
