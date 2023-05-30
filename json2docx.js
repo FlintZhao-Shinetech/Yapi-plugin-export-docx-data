@@ -23,7 +23,7 @@ function toDocx(data) {
   doc.setOptions({ linebreaks: true, parser });
 
   // set the templateVariables
-  doc.setData(data);
+  doc.setData(JSON.parse(data));
 
   try {
     // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)

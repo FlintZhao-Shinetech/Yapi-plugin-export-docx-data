@@ -15,20 +15,23 @@ function realParser(api){
     if(!api.res_body_is_json_schema){
         return api;
     }
+    // 移除const效果，否则在toDocx之前的JSON.stringify会丢失新增的属性
+    // 即使这里看上去像是加上了
+    let newApi=JSON.parse(JSON.stringify(api));
     let res_body_schema=null;
     try{
-        res_body_schema=JSON.parse(api.res_body);
+        res_body_schema=JSON.parse(newApi.res_body);
     }catch(e){
-        console.log(api.res_body);
+        console.log(newApi.res_body);
     }
     let schema_array=[];
     if(res_body_schema){
         parse_schema("",res_body_schema,false,schema_array,0);
     }else{
-        api.res_body_is_json_schema=false;
+        newApi.res_body_is_json_schema=false;
     }
-    api.res_body_json_schema_form=schema_array;
-    return api;
+    newApi.res_body_json_schema_form=schema_array;
+    return newApi;
 }
 
 function parse_schema(name, schema,current_required,schema_array,depth){
