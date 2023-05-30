@@ -8,7 +8,7 @@ const yapi = require('yapi.js');
 const toDocx = require('./json2docx');
 const fs = require('fs');
 const jsonSchemaParser = require('./parseJsonSchema');
-
+const remarkParser=require('./parseApiRemark');
 /* eslint-enable */
 
 function handleExistId(data) {
@@ -81,10 +81,11 @@ class exportController extends baseController {
       const list = await this.handleListClass(pid, status);
       const data = handleExistId(list);
       const dataWithJsonSchema = jsonSchemaParser(data);
+      const dataWithPureTextRemark=remarkParser(dataWithJsonSchema);
       const log = await this.logModel.listWithPaging(pid, 'project', 1, 10000);
       tp = JSON.stringify({
         curProjectName: `${curProject.name}接口文档`,
-        apis: dataWithJsonSchema,
+        apis: dataWithPureTextRemark,
         log,
       },null,2);
       ctx.set('Content-Disposition', `attachment; filename=${encodeURI(`${curProject.name}接口文档`)}.docx`);
