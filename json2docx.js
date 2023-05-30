@@ -7,6 +7,7 @@ const yapi = require('yapi.js');
 const fs = require('fs');
 const path = require('path');
 const parser = require('./parser.js');
+// const jsonSchemaParser = require('./parseJsonSchema');
 
 // Load the docx file as a binary
 
@@ -22,7 +23,17 @@ function toDocx(data) {
   doc.setOptions({ linebreaks: true, parser });
 
   // set the templateVariables
-  doc.setData(JSON.parse(data));
+  let data_json=JSON.parse(data);
+  // data_json.apis=jsonSchemaParser(data_json.apis);
+  console.log("检查toDocx");
+  for (let group of data_json.apis) {
+    for (let api of group.list) {
+      if (api.res_body_is_json_schema && api.res_body_json_schema_form) {
+        console.log(group.name + ":" + api.title + api.query_path.path);
+      }
+    }
+  }
+  doc.setData(data_json);
 
   try {
     // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)

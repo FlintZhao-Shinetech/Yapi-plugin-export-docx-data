@@ -6,6 +6,9 @@ const interfaceCatModel = require('models/interfaceCat.js');
 const logModel = require('models/log.js');
 const yapi = require('yapi.js');
 const toDocx = require('./json2docx');
+const fs = require('fs');
+const jsonSchemaParser = require('./parseJsonSchema');
+
 /* eslint-enable */
 
 function handleExistId(data) {
@@ -60,7 +63,6 @@ class exportController extends baseController {
         newResult.push(item);
       }
     }
-
     return newResult;
   }
 
@@ -78,15 +80,20 @@ class exportController extends baseController {
       ctx.set('Content-Type', 'application/octet-stream');
       const list = await this.handleListClass(pid, status);
       const data = handleExistId(list);
+      const dataWithJsonSchema = jsonSchemaParser(data);
+      console.log("auth point 1");
+      this.validateIfNewAttrExists(dataWithJsonSchema);
       const log = await this.logModel.listWithPaging(pid, 'project', 1, 10000);
-      // console.log(log)
+      console.log("auth point 2");
+      this.validateIfNewAttrExists(dataWithJsonSchema);
       tp = JSON.stringify({
         curProjectName: `${curProject.name}接口文档`,
-        apis: data,
+        apis: dataWithJsonSchema,
         log,
-      }, null, 2);
+      });
+      console.log("auth point 3");
+      this.validateIfNewAttrExists(JSON.parse(tp).apis);
       ctx.set('Content-Disposition', `attachment; filename=${encodeURI(`${curProject.name}接口文档`)}.docx`);
-      // ctx.set('Content-Type', 'application/json');
       const rst = toDocx(tp);
       return (ctx.body = rst);
     } catch (error) {
@@ -94,6 +101,22 @@ class exportController extends baseController {
       ctx.body = yapi.commons.resReturn(null, 502, '下载出错');
     }
   }
+  validateIfNewAttrExists(data){
+    console.log("执行转换函数");
+    let propFinded=false;
+    for (let group of data) {
+      for (let api of group.list) {
+        if (api.res_body_is_json_schema && api.res_body_json_schema_form) {
+          console.log(group.name + ":" + api.title + api.query_path.path);
+          propFinded=true;
+          console.log("find added prop, break");
+          break;
+        }
+      }
+      if(propFinded){
+        break;
+      }
+    }
+  }
 }
-
 module.exports = exportController;
