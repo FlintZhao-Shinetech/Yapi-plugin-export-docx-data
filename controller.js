@@ -82,34 +82,17 @@ class exportController extends baseController {
       const data = handleExistId(list);
       const dataWithJsonSchema = jsonSchemaParser(data);
       const log = await this.logModel.listWithPaging(pid, 'project', 1, 10000);
-      tp = {
+      tp = JSON.stringify({
         curProjectName: `${curProject.name}接口文档`,
         apis: dataWithJsonSchema,
         log,
-      };
+      },null,2);
       ctx.set('Content-Disposition', `attachment; filename=${encodeURI(`${curProject.name}接口文档`)}.docx`);
       const rst = toDocx(tp);
       return (ctx.body = rst);
     } catch (error) {
       yapi.commons.log(error, 'error');
       ctx.body = yapi.commons.resReturn(null, 502, '下载出错');
-    }
-  }
-  validateIfNewAttrExists(data){
-    console.log("执行转换函数");
-    let propFinded=false;
-    for (let group of data) {
-      for (let api of group.list) {
-        if (api.res_body_is_json_schema && api.res_body_json_schema_form) {
-          console.log(group.name + ":" + api.title + api.query_path.path);
-          propFinded=true;
-          console.log("find added prop, break");
-          break;
-        }
-      }
-      if(propFinded){
-        break;
-      }
     }
   }
 }
