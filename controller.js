@@ -74,25 +74,19 @@ class exportController extends baseController {
       ctx.body = yapi.commons.resReturn(null, 200, 'pid 不为空');
     }
     let curProject;
-    let tp = '';
+    let tp = {};
     try {
       curProject = await this.projectModel.get(pid);
       ctx.set('Content-Type', 'application/octet-stream');
       const list = await this.handleListClass(pid, status);
       const data = handleExistId(list);
       const dataWithJsonSchema = jsonSchemaParser(data);
-      console.log("auth point 1");
-      this.validateIfNewAttrExists(dataWithJsonSchema);
       const log = await this.logModel.listWithPaging(pid, 'project', 1, 10000);
-      console.log("auth point 2");
-      this.validateIfNewAttrExists(dataWithJsonSchema);
-      tp = JSON.stringify({
+      tp = {
         curProjectName: `${curProject.name}接口文档`,
         apis: dataWithJsonSchema,
         log,
-      });
-      console.log("auth point 3");
-      this.validateIfNewAttrExists(JSON.parse(tp).apis);
+      };
       ctx.set('Content-Disposition', `attachment; filename=${encodeURI(`${curProject.name}接口文档`)}.docx`);
       const rst = toDocx(tp);
       return (ctx.body = rst);

@@ -23,17 +23,7 @@ function toDocx(data) {
   doc.setOptions({ linebreaks: true, parser });
 
   // set the templateVariables
-  let data_json=JSON.parse(data);
-  // data_json.apis=jsonSchemaParser(data_json.apis);
-  console.log("检查toDocx");
-  for (let group of data_json.apis) {
-    for (let api of group.list) {
-      if (api.res_body_is_json_schema && api.res_body_json_schema_form) {
-        console.log(group.name + ":" + api.title + api.query_path.path);
-      }
-    }
-  }
-  doc.setData(data_json);
+  doc.setData(data);
 
   try {
     // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
