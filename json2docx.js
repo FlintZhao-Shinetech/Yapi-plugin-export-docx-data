@@ -12,8 +12,10 @@ const parser = require('./parser.js');
 // Load the docx file as a binary
 
 function toDocx(data) {
+  let templateName=getTemplateFileName(data);
+  console.log("using template: "+templateName);
   const content = fs
-    .readFileSync(path.resolve(yapi.WEBROOT_SERVER, '../', 'input.docx'), 'binary');
+    .readFileSync(path.resolve(yapi.WEBROOT_SERVER, '../', templateName), 'binary');
 
   const zip = new JSZip(content);
 
@@ -48,4 +50,23 @@ function toDocx(data) {
   // fs.writeFileSync(path.resolve(__dirname, 'output.docx'), buf);
   return buf;
 }
+
+function getTemplateFileName(data){
+  let dataJson=JSON.parse(data);
+  if(!dataJson.project){
+    return "input.docx";
+  }
+  try{
+    fs.accessSync(path.resolve(yapi.WEBROOT_SERVER, '../', "docTemplates"),fs.constants.R_OK);
+  }catch{
+    return "input.docx";
+  }
+  try{
+    fs.accessSync(path.resolve(yapi.WEBROOT_SERVER, '../', "docTemplates/input-"+dataJson.project._id+".docx"),fs.constants.R_OK);
+  }catch{
+    return "input.docx";
+  }
+  return "docTemplates/input-"+dataJson.project._id+".docx";
+}
+
 module.exports = toDocx;

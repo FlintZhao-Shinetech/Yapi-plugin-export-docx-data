@@ -87,6 +87,7 @@ class exportController extends baseController {
         curProjectName: `${curProject.name}接口文档`,
         apis: dataWithPureTextRemark,
         log,
+        project: curProject,
       },null,2);
       ctx.set('Content-Disposition', `attachment; filename=${encodeURI(`${curProject.name}接口文档`)}.docx`);
       const rst = toDocx(tp);
