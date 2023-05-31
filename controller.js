@@ -6,7 +6,6 @@ const interfaceCatModel = require('models/interfaceCat.js');
 const logModel = require('models/log.js');
 const yapi = require('yapi.js');
 const toDocx = require('./json2docx');
-const fs = require('fs');
 const jsonSchemaParser = require('./parseJsonSchema');
 const remarkParser=require('./parseApiRemark');
 /* eslint-enable */
@@ -42,7 +41,7 @@ function handleExistId(data) {
   return data;
 }
 
-class exportController extends baseController {
+class exportDocxController extends baseController {
   constructor(ctx) {
     super(ctx);
     this.catModel = yapi.getInst(interfaceCatModel);
@@ -98,4 +97,4 @@ class exportController extends baseController {
     }
   }
 }
-module.exports = exportController;
+module.exports = exportDocxController;
