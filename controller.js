@@ -6,6 +6,9 @@ const interfaceCatModel = require('models/interfaceCat.js');
 const logModel = require('models/log.js');
 const yapi = require('yapi.js');
 const toDocx = require('./json2docx');
+const fs = require('fs');
+const jsonSchemaParser = require('./parseJsonSchema');
+const remarkParser=require('./parseApiRemark');
 /* eslint-enable */
 
 function handleExistId(data) {
@@ -60,7 +63,6 @@ class exportController extends baseController {
         newResult.push(item);
       }
     }
-
     return newResult;
   }
 
@@ -72,21 +74,22 @@ class exportController extends baseController {
       ctx.body = yapi.commons.resReturn(null, 200, 'pid 不为空');
     }
     let curProject;
-    let tp = '';
+    let tp = {};
     try {
       curProject = await this.projectModel.get(pid);
       ctx.set('Content-Type', 'application/octet-stream');
       const list = await this.handleListClass(pid, status);
       const data = handleExistId(list);
+      const dataWithJsonSchema = jsonSchemaParser(data);
+      const dataWithPureTextRemark=remarkParser(dataWithJsonSchema);
       const log = await this.logModel.listWithPaging(pid, 'project', 1, 10000);
-      // console.log(log)
       tp = JSON.stringify({
         curProjectName: `${curProject.name}接口文档`,
-        apis: data,
+        apis: dataWithPureTextRemark,
         log,
-      }, null, 2);
+        project: curProject,
+      },null,2);
       ctx.set('Content-Disposition', `attachment; filename=${encodeURI(`${curProject.name}接口文档`)}.docx`);
-      // ctx.set('Content-Type', 'application/json');
       const rst = toDocx(tp);
       return (ctx.body = rst);
     } catch (error) {
@@ -95,5 +98,4 @@ class exportController extends baseController {
     }
   }
 }
-
 module.exports = exportController;

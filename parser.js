@@ -1,5 +1,4 @@
 function parse(tag) {
-  // console.log(tag)
   return {
     get(scope, context) {
       if (tag === '$index') {
